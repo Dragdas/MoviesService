@@ -18,8 +18,8 @@ public class MovieRating {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "IMDB_ID", nullable = false)
-    private String imdbId;
+    @Column(name = "OMDB_ID", nullable = false)
+    private String omdbId;
 
     @Column(name = "RATING", nullable = true)
     private int rating;
