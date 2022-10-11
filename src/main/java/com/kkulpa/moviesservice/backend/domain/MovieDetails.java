@@ -1,5 +1,6 @@
 package com.kkulpa.moviesservice.backend.domain;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,26 +12,24 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "USERS")
-public class User {
+@Table(name = "MOVIE_DETAILS")
+public class MovieDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "USER_NAME")
-    private String userName;
-
-    @Column(name = "PASSWORD")
-    private String password;
-
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "RATINGS")
     public List<MovieRating> ratings;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "USER_DETAILS", nullable = false)
-    private UserDetails userDetails;
+    @JoinColumn(name = "MOVIE_STATISTICS", nullable = false)
+    private MovieStatistics movieStatistics;
+
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "COMMENTS")
+    public List<MovieComment> comments;
 
 }

@@ -4,14 +4,15 @@ package com.kkulpa.moviesservice.backend.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 
 @Data
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "MOVIE_RATINGS")
-public class MovieRating {
+@Table(name = "QUIZ_QUESTIONS")
+public class QuizQuestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,15 +21,21 @@ public class MovieRating {
 
     @ManyToOne
     @JoinColumn(name = "USERS", nullable = false)
-    private User reviewer;
+    private User author;
 
-    @ManyToOne
-    @JoinColumn(name = "MOVIE_DETAILS", nullable = false)
-    private MovieDetails movieDetails;
+    @Column(name = "QUESTION")
+    private String question;
 
-    @Column(name = "RATING", nullable = true)
-    private int rating;
+    @Column(name = "CORRECT_ANSWER")
+    private String correctAnswer;
 
-    @Column(name = "IS_FAVOURITE", nullable = true)
-    private boolean isFavourite;
+    @Column(name = "ANSWER_A")
+    private String answerA;
+
+    @Column(name = "ANSWER_B")
+    private String answerB;
+
+    @Column(name = "ANSWER_C")
+    private String answerC;
+
 }

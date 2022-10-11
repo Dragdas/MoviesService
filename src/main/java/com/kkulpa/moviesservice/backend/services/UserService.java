@@ -20,13 +20,13 @@ public class UserService {
         return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
     }
 
-    public User addUser(UserDto userDto){
+/*    public User addUser(UserDto userDto){
         User user = new User(null,
                 userDto.getUserName(),
                 userDto.getPassword(),
                 Collections.emptyList());
 
         return userRepository.save(user);
-    }
+    }*/
 
 }
