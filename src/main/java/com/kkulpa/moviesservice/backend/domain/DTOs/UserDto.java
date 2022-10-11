@@ -15,4 +15,5 @@ public class UserDto {
     private String userName;
     private String password;
     public List<MovieRating> ratings;
+
 }

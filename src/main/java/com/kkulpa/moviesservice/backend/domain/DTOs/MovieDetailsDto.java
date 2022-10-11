@@ -21,5 +21,7 @@ public class MovieDetailsDto {
     public String plot;
     @JsonProperty("Poster")
     public String poster;
+    @JsonProperty("BoxOffice")
+    public String boxOffice;
 
 }

@@ -28,6 +28,4 @@ public class User {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "RATINGS")
     public List<MovieRating> ratings;
-
-
 }
