@@ -20,6 +20,7 @@ class ExchangeClientTest {
         double result = exchangeClient.convertCurrencies("USD", "PLN",  "1000");
 
         //then
+        System.out.println(result);
         Assertions.assertTrue(result>0);
 
 

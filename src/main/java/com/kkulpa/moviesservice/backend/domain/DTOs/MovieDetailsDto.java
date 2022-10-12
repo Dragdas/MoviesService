@@ -10,6 +10,7 @@ import lombok.ToString;
 @ToString
 public class MovieDetailsDto {
 
+    @JsonProperty("imdbID")
     public String imdbID;
     @JsonProperty("Title")
     public String title;

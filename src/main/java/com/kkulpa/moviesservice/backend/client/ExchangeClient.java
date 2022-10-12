@@ -3,6 +3,7 @@ package com.kkulpa.moviesservice.backend.client;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
 import lombok.RequiredArgsConstructor;
+
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -26,6 +27,7 @@ public class ExchangeClient {
         Request request = generateRequest(url);
 
         Response response = client.newCall(request).execute();
+
         String rawJson = response.body() != null ? response.body().string() : null;
 
         if( rawJson==null)

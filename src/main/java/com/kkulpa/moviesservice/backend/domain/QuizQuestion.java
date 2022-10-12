@@ -23,6 +23,10 @@ public class QuizQuestion {
     @JoinColumn(name = "USERS", nullable = false)
     private User author;
 
+    @ManyToOne
+    @JoinColumn(name = "MOVIE", nullable = false)
+    private MovieDetails movie;
+
     @Column(name = "QUESTION")
     private String question;
 
