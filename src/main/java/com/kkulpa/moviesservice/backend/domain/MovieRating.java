@@ -19,11 +19,11 @@ public class MovieRating {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "USERS", nullable = false)
+    @JoinColumn(name = "USERS")
     private User reviewer;
 
     @ManyToOne
-    @JoinColumn(name = "MOVIE_DETAILS", nullable = false)
+    @JoinColumn(name = "MOVIE_DETAILS")
     private MovieDetails movieDetails;
 
     @Column(name = "RATING", nullable = true)

@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "USERS")
+@Table(name = "COMMENTS")
 public class MovieComment {
 
     @Id
@@ -20,7 +20,7 @@ public class MovieComment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "USERS", nullable = false)
+    @JoinColumn(name = "AUTHOR", nullable = false)
     private User author;
 
     @ManyToOne

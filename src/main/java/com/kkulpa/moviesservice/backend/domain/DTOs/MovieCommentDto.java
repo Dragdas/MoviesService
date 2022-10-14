@@ -1,7 +1,6 @@
 package com.kkulpa.moviesservice.backend.domain.DTOs;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,11 +11,10 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-public class MovieDto {
+public class MovieCommentDto {
 
-    @JsonProperty("Title")
-    public String title;
-    @JsonProperty("Year")
-    public String year;
-    public String imdbID;
+    private long id;
+    private long authorId;
+    private long movieDetailsId;
+    private String comment;
 }

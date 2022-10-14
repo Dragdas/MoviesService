@@ -18,7 +18,7 @@ public class UserDetails {
     @Column(name = "ID")
     private Long id;
 
-    @Column(name = "DISPLAY_NAME")
+    @Column(name = "DISPLAY_NAME", unique = true)
     private String displayName;
 
     @Column(name = "BIO")
