@@ -17,6 +17,12 @@ public class UserPublicController {
 
     private final UserService userService;
 
+    //todo remove
+    @GetMapping
+    public String test(){
+        return "public access";
+    }
+
     @PostMapping
     public ResponseEntity<UserDto> registerUser(@RequestParam String userName,
                                                 @RequestParam String displayName,
