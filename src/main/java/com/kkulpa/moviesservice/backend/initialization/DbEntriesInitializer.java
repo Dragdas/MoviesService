@@ -18,7 +18,7 @@ public class DbEntriesInitializer {
     @EventListener
     public void appReady(ApplicationReadyEvent event) throws UserNameIsNotAvailableException, DisplayNameNotAvailableException {
 
-        userService.addUser("TestUser", "TestUserNick", "abc");
+        userService.addUser("a", "TestUserNick", "a");
         userService.addUser("Adam", "Adam", "123");
         userService.addUser("Ewa", "Ewa", "123");
 

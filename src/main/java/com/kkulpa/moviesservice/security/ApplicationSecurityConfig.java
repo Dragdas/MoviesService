@@ -33,7 +33,8 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                     .anyRequest()
                     .authenticated()
                 .and()
-                .formLogin()
+                .httpBasic()// todo zmienic na form
+                //.formLogin()
                 .and()
                 .logout()
                     .clearAuthentication(true)

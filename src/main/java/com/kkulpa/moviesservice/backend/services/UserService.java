@@ -1,5 +1,6 @@
 package com.kkulpa.moviesservice.backend.services;
 
+import com.kkulpa.moviesservice.backend.domain.DTOs.UserDto;
 import com.kkulpa.moviesservice.backend.domain.User;
 import com.kkulpa.moviesservice.backend.domain.UserDetails;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.DisplayNameNotAvailableException;
@@ -7,8 +8,11 @@ import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNameIsNotAv
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
 import com.kkulpa.moviesservice.backend.repositories.UserDetailsRepository;
 import com.kkulpa.moviesservice.backend.repositories.UserRepository;
+import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 
@@ -46,6 +50,27 @@ public class UserService {
 
 
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public UserDto updateLoginCredentials(ApplicationUser user, UserDto newUserData) throws UserNotFoundException {
+
+        User userToBeUpdated = userRepository.findByUserName(user.getUsername())
+                                    .orElseThrow(UserNotFoundException::new);
+
+        if(!userRepository.existsByUserName(newUserData.getUserName()))
+            userToBeUpdated.setUserName(newUserData.getUserName());
+
+        userToBeUpdated.setPassword(newUserData.getPassword());
+
+        userToBeUpdated = userRepository.save(userToBeUpdated);
+
+        return new UserDto(userToBeUpdated.getId(),
+                userToBeUpdated.getUserName(),
+                userToBeUpdated.getPassword(),
+                null,
+                null
+                );
     }
 
 }
