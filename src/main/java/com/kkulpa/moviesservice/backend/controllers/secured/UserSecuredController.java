@@ -5,12 +5,15 @@ import com.kkulpa.moviesservice.backend.domain.DTOs.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/secured/users")
 @RequiredArgsConstructor
 public class UserSecuredController {
+
 
 
     @PutMapping(value = "/updateLogin", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -24,7 +27,7 @@ public class UserSecuredController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteArticleById(){
+    public ResponseEntity<Void> deleteUserById(){
         return ResponseEntity.ok().build();
     }
 

@@ -2,11 +2,12 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 
 
 import com.kkulpa.moviesservice.backend.domain.DTOs.*;
+import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -49,7 +50,9 @@ public class MoviesSecuredController {
     }
 
     @GetMapping("/rating/fav/ranking")
-    public ResponseEntity<List<MovieDto>> getFavouriteCountRanking(){
+    public ResponseEntity<List<MovieDto>> getFavouriteCountRanking(Authentication authentication){
+        ApplicationUser user = (ApplicationUser) authentication.getPrincipal();
+
         return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
     }
 
