@@ -1,6 +1,7 @@
 package com.kkulpa.moviesservice.backend.errorHandling;
 
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.DisplayNameNotAvailableException;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNameIsNotAvailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,12 @@ public class GlobalHttpErrorHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<Object> handleDisplayNameTaken(DisplayNameNotAvailableException exception){
         return new ResponseEntity<>("Provided display name is already taken",
                 HttpStatus.IM_USED);
+    }
+
+    @ExceptionHandler(MovieDetailsUnavailableException.class)
+    public ResponseEntity<Object> handleMissingMovieDetails(MovieDetailsUnavailableException exception){
+        return new ResponseEntity<>("Requested movie details are unavailable",
+                HttpStatus.NOT_FOUND);
     }
 
 

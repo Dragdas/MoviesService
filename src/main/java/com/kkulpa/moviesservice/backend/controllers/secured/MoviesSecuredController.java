@@ -2,6 +2,8 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 
 
 import com.kkulpa.moviesservice.backend.domain.DTOs.*;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
+import com.kkulpa.moviesservice.backend.services.MovieService;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -15,20 +17,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MoviesSecuredController {
 
+    private final MovieService movieService;
+
     @GetMapping("/search")
-    public ResponseEntity<List<MovieDto>> getSearchResult(@RequestParam String title){
-        return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
+    public ResponseEntity<List<MovieDto>> getSearchResults(@RequestParam String title){
+
+        return ResponseEntity.ok( movieService.getSearchResults(title));
     }
 
     @GetMapping("/getMovieDetails")
-    public ResponseEntity<MovieDetailsDto> getMovieDetails(@RequestParam String imdbID){
-        return ResponseEntity.ok(new MovieDetailsDto("stub ID", "x", "xxx", "y", "-> o", "www", "2$"));
+    public ResponseEntity<MovieDetailsDto> getMovieDetails(@RequestParam String imdbID)
+                                                            throws MovieDetailsUnavailableException {
+
+        return ResponseEntity.ok( movieService.getMovieDetails(imdbID));
     }
 
     @PutMapping(value = "/rating/fav")
-    public ResponseEntity<MovieRatingDto> updateFavouriteStatus(@RequestBody Long userId,
-                                                                @RequestParam String imdbId,
-                                                                @RequestParam boolean isFavourite){
+    public ResponseEntity<MovieRatingDto> updateFavouriteStatus(Authentication authentication,
+                                                                @RequestParam String imdbId){
+
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+
         return ResponseEntity.ok(new MovieRatingDto());
     }
 
@@ -40,12 +49,12 @@ public class MoviesSecuredController {
     }
 
     @GetMapping("/rating/fav")
-    public ResponseEntity<List<MovieDto>> getFavouriteMovies(@RequestParam Long userId){
+    public ResponseEntity<List<MovieDto>> getUsersFavouriteMovies(@RequestParam Long userId){
         return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
     }
 
     @GetMapping("/rating/rating")
-    public ResponseEntity<List<MovieDto>> getRatedFilms(@RequestParam Long userId){
+    public ResponseEntity<List<MovieDto>> getUsersRatedFilms(@RequestParam Long userId){
         return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
     }
 

@@ -4,6 +4,7 @@ package com.kkulpa.moviesservice.backend.client;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDetailsDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.SearchDto;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -21,9 +22,9 @@ public class OmdbClient {
     private final String API_ENDPOINT = "http://www.omdbapi.com/";
     private final String API_KEY = "8d1d6828"; // left here because it is example project
 
-    public List<MovieDto> searchForMovies(String title, String year) {
+    public List<MovieDto> searchForMovies(String title) {
 
-        URI url = generateSearchFilmRequestPath(title, year);
+        URI url = generateSearchFilmRequestPath(title);
 
         SearchDto searchResponse = restTemplate.getForObject(url, SearchDto.class);
 
@@ -32,14 +33,14 @@ public class OmdbClient {
         return searchResponse.getFilms();
     }
 
-    public MovieDetailsDto getMovieDetails(String imdbId) throws Exception {
+    public MovieDetailsDto getMovieDetails(String imdbId) throws MovieDetailsUnavailableException {
 
         URI url = generateGetFilmDetailsRequestPath(imdbId);
 
         MovieDetailsDto filmDetailsResponse = restTemplate.getForObject(url, MovieDetailsDto.class);
 
-        if(filmDetailsResponse==null)// TODO global exception handler
-            throw new Exception("Get movie details returned null");
+        if(filmDetailsResponse==null)
+            throw new MovieDetailsUnavailableException();
         return filmDetailsResponse;
     }
 
@@ -53,13 +54,12 @@ public class OmdbClient {
                 .toUri();
     }
 
-    private URI generateSearchFilmRequestPath(String title, String year){
+    private URI generateSearchFilmRequestPath(String title){
 
         return UriComponentsBuilder.fromHttpUrl(API_ENDPOINT)
                 .queryParam("apikey", API_KEY)
                 .queryParam("type", "movie")
                 .queryParam("s", title)
-                .queryParam("y", year)
                 .build()
                 .encode()
                 .toUri();
