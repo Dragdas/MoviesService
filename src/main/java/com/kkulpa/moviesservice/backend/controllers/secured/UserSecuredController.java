@@ -48,7 +48,11 @@ public class UserSecuredController {
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteUserById(){
+    public ResponseEntity<Void> deleteUserById(Authentication authentication) throws UserNotFoundException {
+
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+        userService.deleteUser(requestingUser);
+
         return ResponseEntity.ok().build();
     }
 

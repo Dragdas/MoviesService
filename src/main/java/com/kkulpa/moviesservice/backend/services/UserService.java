@@ -89,4 +89,12 @@ public class UserService {
                 );
     }
 
+    public void deleteUser(ApplicationUser requestingUser) throws UserNotFoundException {
+
+        User userToBeRemoved = userRepository.findByUserName(requestingUser.getUsername())
+                .orElseThrow(UserNotFoundException::new);
+
+        userRepository.delete(userToBeRemoved);
+    }
+
 }
