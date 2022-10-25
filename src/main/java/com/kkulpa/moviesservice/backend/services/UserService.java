@@ -3,6 +3,7 @@ package com.kkulpa.moviesservice.backend.services;
 import com.kkulpa.moviesservice.backend.domain.DTOs.UserDto;
 import com.kkulpa.moviesservice.backend.domain.User;
 import com.kkulpa.moviesservice.backend.domain.UserDetails;
+import com.kkulpa.moviesservice.backend.domain.mappers.UserDetailsMapper;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.DisplayNameNotAvailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNameIsNotAvailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
@@ -10,6 +11,7 @@ import com.kkulpa.moviesservice.backend.repositories.UserDetailsRepository;
 import com.kkulpa.moviesservice.backend.repositories.UserRepository;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,19 @@ public class UserService {
 
     public User getUser(Long id) throws UserNotFoundException {
         return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    }
+
+    public UserDto getSessionUser(Authentication authentication) throws UserNotFoundException {
+        User user = userRepository.findByUserName(authentication.getName())
+                .orElseThrow(UserNotFoundException::new);
+
+        return new UserDto(
+                user.getId(),
+                user.getUserName(),
+                "pass: #####",
+                null,
+                UserDetailsMapper.mapToDto(user.getUserDetails())
+        );
     }
 
     public User addUser(String userName, String displayName, String password)
@@ -58,10 +73,11 @@ public class UserService {
         User userToBeUpdated = userRepository.findByUserName(user.getUsername())
                                     .orElseThrow(UserNotFoundException::new);
 
-        if(!userRepository.existsByUserName(newUserData.getUserName()))
+        if(!userRepository.existsByUserName(newUserData.getUserName()) && newUserData.getUserName() != null)
             userToBeUpdated.setUserName(newUserData.getUserName());
 
-        userToBeUpdated.setPassword(newUserData.getPassword());
+        if(newUserData.getPassword() != null)
+            userToBeUpdated.setPassword(newUserData.getPassword());
 
         userToBeUpdated = userRepository.save(userToBeUpdated);
 
