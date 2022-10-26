@@ -13,11 +13,13 @@ import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
 import com.kkulpa.moviesservice.backend.repositories.UserRepository;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,18 +40,71 @@ public class MovieService {
         return omdbClient.getMovieDetails(imdbId);
     }
 
-    @Transactional
-    public void changeFavouriteStatus(ApplicationUser requestingUser, String imdbId) throws Exception {
-
+    public List<MovieDetails> getUsersFavouriteMovies(ApplicationUser requestingUser ) throws UserNotFoundException {
 
         User user = userService.getSessionUser(requestingUser);
 
-        Optional<MovieDetails> movieDetailsOptional = movieDetailsService.getMovieDetailsByImdbId(imdbId);
-        MovieDetails movieDetails = movieDetailsOptional.isPresent() ?
-                                                        movieDetailsOptional.get()
-                                                        : movieDetailsService.addNewMovieDetailsCard(imdbId);
+        return user.getRatings().stream()
+                .filter(MovieRating::isFavourite)
+                .map(MovieRating::getMovieDetails)
+                .collect(Collectors.toList());
 
-        MovieRating movieRatingToBeSaved = movieRatingRepository
+    }
+
+
+    @Transactional
+    public void changeFavouriteStatus(ApplicationUser requestingUser, String imdbId) throws Exception {
+
+        User user = userService.getSessionUser(requestingUser);
+        MovieDetails movieDetails = getOrCreateMovieDetailsCard(imdbId);
+        MovieRating movieRatingToBeSaved = getOrCreateMovieRating(imdbId, user, movieDetails);
+
+        movieRatingToBeSaved.setFavourite( !movieRatingToBeSaved.isFavourite() );
+
+        movieDetailsRepository.save(movieDetails);
+        movieRatingToBeSaved = movieRatingRepository.save(movieRatingToBeSaved);
+        user.getRatings().add(movieRatingToBeSaved);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void changeMovieRating(ApplicationUser requestingUser, String imdbId, int score) throws Exception {
+
+        User user = userService.getSessionUser(requestingUser);
+        MovieDetails movieDetails = getOrCreateMovieDetailsCard(imdbId);
+        MovieRating movieRatingToBeSaved = getOrCreateMovieRating(imdbId, user, movieDetails);
+
+
+        movieRatingToBeSaved.setRating(normalizeScore(score));
+
+        movieDetailsRepository.save(movieDetails);
+        movieRatingToBeSaved = movieRatingRepository.save(movieRatingToBeSaved);
+        user.getRatings().add(movieRatingToBeSaved);
+        userRepository.save(user);
+    }
+
+
+
+
+
+
+    private int normalizeScore(int score){
+        if(score<1)
+            return 1;
+        if(score>10)
+            return 10;
+        else return score;
+    }
+
+    private MovieDetails getOrCreateMovieDetailsCard(String imdbId) throws Exception {
+        Optional<MovieDetails> movieDetailsOptional = movieDetailsService.getMovieDetailsByImdbId(imdbId);
+        return movieDetailsOptional.isPresent() ?
+                movieDetailsOptional.get()
+                : movieDetailsService.addNewMovieDetailsCard(imdbId);
+    }
+
+    private MovieRating getOrCreateMovieRating(String imdbId, User user, MovieDetails movieDetails) {
+        return movieRatingRepository
                 .findMovieRatingByUserNameAndIMDB(user.getUserName(), imdbId)
                 .orElse(new MovieRating(
                         null,
@@ -57,18 +112,8 @@ public class MovieService {
                         movieDetails,
                         0,
                         false
-                        ));
-
-        movieRatingToBeSaved.setFavourite( !movieRatingToBeSaved.isFavourite() );
-
-
-        movieDetailsRepository.save(movieDetails);
-        movieRatingToBeSaved = movieRatingRepository.save(movieRatingToBeSaved);
-
-        user.getRatings().add(movieRatingToBeSaved);
-        userRepository.save(user);
+                ));
     }
-
 
 
 }
