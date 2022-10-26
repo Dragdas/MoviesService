@@ -29,7 +29,8 @@ public class UserSecuredController {
     @GetMapping
     public ResponseEntity<UserDto> getUserInfo(Authentication authentication) throws UserNotFoundException {
 
-        User user = userService.getSessionUser(authentication);
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+        User user = userService.getSessionUser(requestingUser);
 
         return ResponseEntity.ok(UserMapper.mapToDto(user));
     }

@@ -33,12 +33,14 @@ public class MoviesSecuredController {
     }
 
     @PutMapping(value = "/rating/fav")
-    public ResponseEntity<MovieRatingDto> updateFavouriteStatus(Authentication authentication,
-                                                                @RequestParam String imdbId){
+    public ResponseEntity<Void> changeFavouriteStatus(Authentication authentication,
+                                                    @RequestParam String imdbId)
+                                                    throws Exception {
 
         ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+        movieService.changeFavouriteStatus(requestingUser, imdbId);
 
-        return ResponseEntity.ok(new MovieRatingDto());
+        return ResponseEntity.ok().build();
     }
 
     @PutMapping(value = "/rating/rating")

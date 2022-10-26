@@ -26,10 +26,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserDetailsRepository userDetailsRepository;
 
-    //TODO zmienic miejsce mapowania na kontroller
-    public User getSessionUser(Authentication authentication) throws UserNotFoundException {
+    public User getSessionUser(ApplicationUser requestingUser) throws UserNotFoundException {
 
-        return userRepository.findByUserName(authentication.getName())
+        return userRepository.findByUserName(requestingUser.getUsername())
                 .orElseThrow(UserNotFoundException::new);
     }
 
