@@ -26,21 +26,11 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserDetailsRepository userDetailsRepository;
 
-    public User getUser(Long id) throws UserNotFoundException {
-        return userRepository.findById(id).orElseThrow(UserNotFoundException::new);
-    }
+    //TODO zmienic miejsce mapowania na kontroller
+    public User getSessionUser(Authentication authentication) throws UserNotFoundException {
 
-    public UserDto getSessionUser(Authentication authentication) throws UserNotFoundException {
-        User user = userRepository.findByUserName(authentication.getName())
+        return userRepository.findByUserName(authentication.getName())
                 .orElseThrow(UserNotFoundException::new);
-
-        return new UserDto(
-                user.getId(),
-                user.getUserName(),
-                "pass: #####",
-                null,
-                UserDetailsMapper.mapToDto(user.getUserDetails())
-        );
     }
 
     public User addUser(String userName, String displayName, String password)
@@ -68,7 +58,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserDto updateLoginCredentials(ApplicationUser user, UserDto newUserData) throws UserNotFoundException {
+    public User updateLoginCredentials(ApplicationUser user, UserDto newUserData) throws UserNotFoundException {
 
         User userToBeUpdated = userRepository.findByUserName(user.getUsername())
                                     .orElseThrow(UserNotFoundException::new);
@@ -79,14 +69,7 @@ public class UserService {
         if(newUserData.getPassword() != null)
             userToBeUpdated.setPassword(newUserData.getPassword());
 
-        userToBeUpdated = userRepository.save(userToBeUpdated);
-
-        return new UserDto(userToBeUpdated.getId(),
-                userToBeUpdated.getUserName(),
-                userToBeUpdated.getPassword(),
-                null,
-                null
-                );
+        return userRepository.save(userToBeUpdated);
     }
 
     public void deleteUser(ApplicationUser requestingUser) throws UserNotFoundException {

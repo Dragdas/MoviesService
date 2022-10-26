@@ -16,7 +16,7 @@ public class UserDetailsService {
     private final UserDetailsRepository userDetailsRepository;
 
 
-    public UserDetailsDto updateUserDetails(UserDetailsDto newUserDetailsData, ApplicationUser requestingUser )
+    public UserDetails updateUserDetails(UserDetailsDto newUserDetailsData, ApplicationUser requestingUser )
                                                                         throws  UserNotFoundException,
                                                                                 UserNameIsNotAvailableException {
 
@@ -36,14 +36,8 @@ public class UserDetailsService {
         if(newUserDetailsData.getPhotoLink() != null)
             userDetailsForUpdate.setPhotoLink(newUserDetailsData.getPhotoLink());
 
-        userDetailsRepository.save(userDetailsForUpdate);
+        return userDetailsRepository.save(userDetailsForUpdate);
 
-        return new UserDetailsDto(
-                userDetailsForUpdate.getId(),
-                userDetailsForUpdate.getDisplayName(),
-                userDetailsForUpdate.getBio(),
-                userDetailsForUpdate.getPhotoLink()
-        );
     }
 
     private boolean displayNameIsTaken(UserDetailsDto newUserDetailsData) {

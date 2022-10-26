@@ -3,6 +3,10 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 
 import com.kkulpa.moviesservice.backend.domain.DTOs.UserDetailsDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.UserDto;
+import com.kkulpa.moviesservice.backend.domain.User;
+import com.kkulpa.moviesservice.backend.domain.UserDetails;
+import com.kkulpa.moviesservice.backend.domain.mappers.UserDetailsMapper;
+import com.kkulpa.moviesservice.backend.domain.mappers.UserMapper;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNameIsNotAvailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
 import com.kkulpa.moviesservice.backend.services.UserDetailsService;
@@ -12,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -26,14 +29,18 @@ public class UserSecuredController {
     @GetMapping
     public ResponseEntity<UserDto> getUserInfo(Authentication authentication) throws UserNotFoundException {
 
-        return ResponseEntity.ok(userService.getSessionUser(authentication));
+        User user = userService.getSessionUser(authentication);
+
+        return ResponseEntity.ok(UserMapper.mapToDto(user));
     }
 
     @PutMapping(value = "/updateLogin", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<UserDto> updateLoginCredentials(@RequestBody UserDto userDto, Authentication authentication)
                                                                                 throws UserNotFoundException {
         ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
-        return ResponseEntity.ok(userService.updateLoginCredentials(requestingUser, userDto));
+        User userUpdated = userService.updateLoginCredentials(requestingUser, userDto);
+
+        return ResponseEntity.ok(UserMapper.mapToDto(userUpdated));
     }
 
     @PutMapping(value = "/updateDetails", consumes = MediaType.APPLICATION_JSON_VALUE)
@@ -43,8 +50,9 @@ public class UserSecuredController {
                                                                                 UserNameIsNotAvailableException {
 
         ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+        UserDetails userDetailsUpdated = userDetailsService.updateUserDetails(newUserDetailsData, requestingUser);
 
-        return ResponseEntity.ok(userDetailsService.updateUserDetails(newUserDetailsData, requestingUser));
+        return ResponseEntity.ok(UserDetailsMapper.mapToDto(userDetailsUpdated));
     }
 
     @DeleteMapping
