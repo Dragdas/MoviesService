@@ -4,12 +4,14 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 import com.kkulpa.moviesservice.backend.domain.DTOs.*;
 import com.kkulpa.moviesservice.backend.domain.MovieDetails;
 import com.kkulpa.moviesservice.backend.domain.MovieRating;
+import com.kkulpa.moviesservice.backend.domain.SearchStatistics;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieRatingMapper;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
 import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
 import com.kkulpa.moviesservice.backend.services.MovieService;
+import com.kkulpa.moviesservice.backend.services.StatisticsService;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -26,10 +28,12 @@ import java.util.stream.Collectors;
 public class MoviesSecuredController {
 
     private final MovieService movieService;
+    private final StatisticsService statisticsService;
 
     @GetMapping("/search")
     public ResponseEntity<List<MovieDto>> getSearchResults(@RequestParam String title){
 
+        statisticsService.addSearchEvent(title);
         return ResponseEntity.ok( movieService.getSearchResults(title));
     }
 
@@ -37,6 +41,7 @@ public class MoviesSecuredController {
     public ResponseEntity<MovieDetailsDto> getMovieDetails(@RequestParam String imdbID)
                                                             throws MovieDetailsUnavailableException {
 
+        statisticsService.addMovieDetailImpression(imdbID);
         return ResponseEntity.ok( movieService.getMovieDetails(imdbID));
     }
 
@@ -83,8 +88,6 @@ public class MoviesSecuredController {
         return ResponseEntity.ok(MovieDetailsMappers.mapListToDto(ratedMovies));
     }
 
-
-
     @GetMapping("/rating/fav/ranking")
     public ResponseEntity<List<MovieDetailsDto>> getFavouriteCountRanking(){
 
@@ -94,8 +97,11 @@ public class MoviesSecuredController {
     }
 
     @GetMapping("/rating/rating/ranking")
-    public ResponseEntity<List<MovieDto>> getRatingRanking(){
-        return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
+    public ResponseEntity<Map<MovieDetailsDto, Double>> getRatingRanking(){
+
+        Map<MovieDetailsDto, Double> ranking = movieService.getMovieRankingByRating();
+
+        return ResponseEntity.ok(ranking);
     }
 
     @PostMapping(value = "/comment", consumes = MediaType.APPLICATION_JSON_VALUE)

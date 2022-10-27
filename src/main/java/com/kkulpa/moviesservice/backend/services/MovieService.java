@@ -6,6 +6,7 @@ import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDto;
 import com.kkulpa.moviesservice.backend.domain.MovieDetails;
 import com.kkulpa.moviesservice.backend.domain.MovieRating;
 import com.kkulpa.moviesservice.backend.domain.User;
+import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
 import com.kkulpa.moviesservice.backend.repositories.MovieDetailsRepository;
@@ -17,8 +18,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,11 +32,19 @@ public class MovieService {
     private final MovieDetailsRepository movieDetailsRepository;
     private final UserRepository userRepository;
 
+
     public List<MovieDto> getSearchResults(String title){
+
         return omdbClient.searchForMovies(title);
     }
 
     public MovieDetailsDto getMovieDetails(String imdbId) throws MovieDetailsUnavailableException {
+
+        Optional<MovieDetails> movieDetailsInRepo = movieDetailsRepository.findMovieDetailsByImdbID(imdbId);
+
+        if(movieDetailsInRepo.isPresent())
+            return MovieDetailsMappers.mapToDto(movieDetailsInRepo.get());
+
         return omdbClient.getMovieDetails(imdbId);
     }
 
@@ -68,6 +76,36 @@ public class MovieService {
 
     }
 
+    public Map<MovieDetailsDto, Double>  getMovieRankingByRating(){
+
+        Map<MovieDetailsDto, Double> ranking = new HashMap<>();
+
+        List<MovieRating> ratedMovies = movieRatingRepository.findRatedMovies();
+
+        Set<String> imdbIDs = ratedMovies.stream()
+                .map(MovieRating::getMovieDetails)
+                .map(MovieDetails::getImdbID)
+                .collect(Collectors.toSet());
+
+        imdbIDs.stream().forEach(imdbID ->{
+            Optional<MovieDetails> movieDetails = ratedMovies.stream()
+                    .map(MovieRating::getMovieDetails)
+                    .filter(details -> details.getImdbID().equals(imdbID))
+                    .findFirst();
+
+            OptionalDouble averageScore = ratedMovies.stream()
+                    .filter(movieRating -> movieRating.getMovieDetails().getImdbID().equals(imdbID))
+                    .mapToInt(MovieRating::getRating)
+                    .average();
+
+            if(movieDetails.isPresent() && averageScore.isPresent())
+                ranking.put( MovieDetailsMappers.mapToDto(movieDetails.get()),
+                             averageScore.getAsDouble());
+        });
+
+        return ranking;
+
+    }
 
 
 

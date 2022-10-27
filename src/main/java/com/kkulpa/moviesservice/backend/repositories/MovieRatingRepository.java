@@ -26,4 +26,10 @@ public interface MovieRatingRepository extends CrudRepository<MovieRating, Long>
     List<MovieDetails> findMostFavouriteMovies();
 
 
+
+    @Query(value = "SELECT mr FROM MovieRating mr " +
+                    "WHERE mr.rating > 0 " +
+                    "ORDER BY mr.movieDetails.imdbID DESC")
+    List<MovieRating> findRatedMovies();
+
 }
