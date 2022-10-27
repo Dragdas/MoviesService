@@ -51,6 +51,27 @@ public class MovieService {
 
     }
 
+    public List<MovieDetails> getUsersRatedMovies(ApplicationUser requestingUser ) throws UserNotFoundException{
+
+        User user = userService.getSessionUser(requestingUser);
+
+        return user.getRatings().stream()
+                .filter( rating -> rating.getRating() > 0)
+                .map(MovieRating::getMovieDetails)
+                .collect(Collectors.toList());
+
+    }
+
+    public List<MovieDetails> getMovieRankingByFavouritesCount(){
+
+        return movieRatingRepository.findMostFavouriteMovies();
+
+    }
+
+
+
+
+
 
     @Transactional
     public void changeFavouriteStatus(ApplicationUser requestingUser, String imdbId) throws Exception {

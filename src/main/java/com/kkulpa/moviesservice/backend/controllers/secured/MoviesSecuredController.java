@@ -2,9 +2,13 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 
 
 import com.kkulpa.moviesservice.backend.domain.DTOs.*;
+import com.kkulpa.moviesservice.backend.domain.MovieDetails;
+import com.kkulpa.moviesservice.backend.domain.MovieRating;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
+import com.kkulpa.moviesservice.backend.domain.mappers.MovieRatingMapper;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
+import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
 import com.kkulpa.moviesservice.backend.services.MovieService;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -63,24 +68,29 @@ public class MoviesSecuredController {
                                                                             throws UserNotFoundException {
 
         ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
-        List<MovieDetailsDto> favouriteMovies = movieService.getUsersFavouriteMovies(requestingUser)
-                                                                    .stream()
-                                                                    .map(MovieDetailsMappers::mapToDto)
-                                                                    .collect(Collectors.toList());
+        List<MovieDetails> favouriteMovies = movieService.getUsersFavouriteMovies(requestingUser);
 
-        return ResponseEntity.ok(favouriteMovies);
+        return ResponseEntity.ok(MovieDetailsMappers.mapListToDto(favouriteMovies));
     }
 
     @GetMapping("/rating/rating")
-    public ResponseEntity<List<MovieDto>> getUsersRatedFilms(@RequestParam Long userId){
-        return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
+    public ResponseEntity<List<MovieDetailsDto>> getUsersRatedFilms(Authentication authentication)
+                                                                            throws UserNotFoundException {
+
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+        List<MovieDetails> ratedMovies = movieService.getUsersRatedMovies(requestingUser);
+
+        return ResponseEntity.ok(MovieDetailsMappers.mapListToDto(ratedMovies));
     }
 
-    @GetMapping("/rating/fav/ranking")
-    public ResponseEntity<List<MovieDto>> getFavouriteCountRanking(Authentication authentication){
-        ApplicationUser user = (ApplicationUser) authentication.getPrincipal();
 
-        return ResponseEntity.ok(List.of(new MovieDto("stub title","2022", "stub id")));
+
+    @GetMapping("/rating/fav/ranking")
+    public ResponseEntity<List<MovieDetailsDto>> getFavouriteCountRanking(){
+
+        List<MovieDetails> ranking = movieService.getMovieRankingByFavouritesCount();
+
+        return ResponseEntity.ok(MovieDetailsMappers.mapListToDto(ranking));
     }
 
     @GetMapping("/rating/rating/ranking")

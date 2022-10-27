@@ -12,6 +12,7 @@ public class ApplicationUserService implements UserDetailsService {
 
     private final ApplicationUserDao userRepoInterface;
 
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepoInterface.selectApplicationUserByUsername(username)
