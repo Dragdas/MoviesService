@@ -72,6 +72,11 @@ public class DbEntriesInitializer {
         movieService.changeFavouriteStatus(u3, "tt0304141");
         movieService.changeFavouriteStatus(u3, "tt0121766");
 
+        movieService.addComment(u1, "tt1201607", "Super film!");
+        movieService.addComment(u2, "tt0325980", "Zjawiskowy!");
+
+
+
 
     }
 

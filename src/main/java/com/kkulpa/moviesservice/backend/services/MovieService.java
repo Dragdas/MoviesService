@@ -1,22 +1,29 @@
 package com.kkulpa.moviesservice.backend.services;
 
 import com.kkulpa.moviesservice.backend.client.OmdbClient;
+import com.kkulpa.moviesservice.backend.domain.DTOs.MovieCommentDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDetailsDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDto;
+import com.kkulpa.moviesservice.backend.domain.MovieComment;
 import com.kkulpa.moviesservice.backend.domain.MovieDetails;
 import com.kkulpa.moviesservice.backend.domain.MovieRating;
 import com.kkulpa.moviesservice.backend.domain.User;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.AccessDeniedException;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.CommentNotFoundException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
+import com.kkulpa.moviesservice.backend.repositories.MovieCommentRepository;
 import com.kkulpa.moviesservice.backend.repositories.MovieDetailsRepository;
 import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
 import com.kkulpa.moviesservice.backend.repositories.UserRepository;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,11 +33,14 @@ import java.util.stream.Collectors;
 public class MovieService {
 
     private final OmdbClient omdbClient;
-    private final MovieRatingRepository movieRatingRepository;
     private final UserService userService;
     private  final MovieDetailsService movieDetailsService;
+    private final MovieRatingRepository movieRatingRepository;
     private final MovieDetailsRepository movieDetailsRepository;
     private final UserRepository userRepository;
+    private final MovieCommentRepository movieCommentRepository;
+
+
 
 
     public List<MovieDto> getSearchResults(String title){
@@ -56,7 +66,6 @@ public class MovieService {
                 .filter(MovieRating::isFavourite)
                 .map(MovieRating::getMovieDetails)
                 .collect(Collectors.toList());
-
     }
 
     public List<MovieDetails> getUsersRatedMovies(ApplicationUser requestingUser ) throws UserNotFoundException{
@@ -104,6 +113,74 @@ public class MovieService {
         });
 
         return ranking;
+    }
+
+    @Transactional
+    public List<MovieComment> addComment(ApplicationUser requestingUser, String imdbId, String comment)
+            throws Exception {
+
+        User user = userService.getSessionUser(requestingUser);
+
+        MovieDetails movieDetails = movieDetailsService.getOrAddMovieDetails(imdbId);
+
+        movieDetails.getComments().add(new MovieComment(
+                                            null,
+                                            user,
+                                            movieDetails,
+                                            comment
+                                            ));
+
+        return movieDetailsRepository.save(movieDetails).getComments();
+    }
+
+    @Transactional
+    public MovieComment updateComment(ApplicationUser requestingUser, Long commentId, String newComment)
+                                                                            throws UserNotFoundException,
+                                                                            AccessDeniedException,
+                                                                            CommentNotFoundException {
+
+        User user = userService.getSessionUser(requestingUser);
+
+        MovieComment movieComment = movieCommentRepository.findById(commentId)
+                                    .orElseThrow(CommentNotFoundException::new);
+
+        if(!user.getUserName().equals(movieComment.getAuthor().getUserName()))
+            throw new AccessDeniedException();
+
+        movieComment.setComment(newComment);
+
+        return movieCommentRepository.save(movieComment);
+    }
+
+    @Transactional
+    public void deleteComment(ApplicationUser requestingUser, Long commentId)
+                                                        throws UserNotFoundException,
+                                                        CommentNotFoundException,
+                                                        AccessDeniedException {
+
+        User user = userService.getSessionUser(requestingUser);
+
+        MovieComment movieComment = movieCommentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+
+        if(!user.getUserName().equals(movieComment.getAuthor().getUserName()))
+            throw new AccessDeniedException();
+
+        MovieDetails movieDetails = movieComment.getMovieDetails();
+
+        movieDetails.getComments().remove(movieComment);
+
+        movieDetailsRepository.save(movieDetails);
+    }
+
+    public List<MovieComment> getMovieCommentsByMovie(String imdbId){
+
+        return movieCommentRepository.findMovieCommentByMovieDetails_ImdbID(imdbId);
+    }
+
+    public List<MovieComment> getMovieCommentsByAuthor(String username){
+
+        return movieCommentRepository.findMovieCommentByAuthor_UserName(username);
 
     }
 

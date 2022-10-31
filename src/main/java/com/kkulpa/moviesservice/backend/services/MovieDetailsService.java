@@ -4,6 +4,7 @@ import com.kkulpa.moviesservice.backend.client.OmdbClient;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDetailsDto;
 import com.kkulpa.moviesservice.backend.domain.MovieDetails;
 import com.kkulpa.moviesservice.backend.domain.MovieStatistics;
+import com.kkulpa.moviesservice.backend.domain.mappers.MovieCommentMapper;
 import com.kkulpa.moviesservice.backend.repositories.MovieDetailsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,17 @@ public class MovieDetailsService {
 
     private final MovieDetailsRepository movieDetailsRepository;
     private final OmdbClient omdbClient;
+
+    public MovieDetails getOrAddMovieDetails(String imdbId){
+
+        return getMovieDetailsByImdbId(imdbId).orElseGet(()->{
+                                try {
+                                    return addNewMovieDetailsCard(imdbId);
+                                } catch (Exception e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
+    }
 
     public Optional<MovieDetails> getMovieDetailsByImdbId(String imdbId){
         return movieDetailsRepository.findMovieDetailsByImdbID(imdbId);

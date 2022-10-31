@@ -1,9 +1,6 @@
 package com.kkulpa.moviesservice.backend.errorHandling;
 
-import com.kkulpa.moviesservice.backend.errorHandling.exceptions.DisplayNameNotAvailableException;
-import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
-import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNameIsNotAvailableException;
-import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -36,6 +33,22 @@ public class GlobalHttpErrorHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>("Requested movie details are unavailable",
                 HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(CommentNotFoundException.class)
+    public ResponseEntity<Object> handleCommentNotFound(CommentNotFoundException exception){
+        return new ResponseEntity<>("Requested comment is unavailable",
+                HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleCommentNotFound(AccessDeniedException exception){
+        return new ResponseEntity<>("You are unauthorized!",
+                HttpStatus.FORBIDDEN);
+    }
+
+
+
+
 
 
 

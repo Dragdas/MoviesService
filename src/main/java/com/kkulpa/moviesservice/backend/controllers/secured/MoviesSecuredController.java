@@ -2,11 +2,15 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 
 
 import com.kkulpa.moviesservice.backend.domain.DTOs.*;
+import com.kkulpa.moviesservice.backend.domain.MovieComment;
 import com.kkulpa.moviesservice.backend.domain.MovieDetails;
 import com.kkulpa.moviesservice.backend.domain.MovieRating;
 import com.kkulpa.moviesservice.backend.domain.SearchStatistics;
+import com.kkulpa.moviesservice.backend.domain.mappers.MovieCommentMapper;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieRatingMapper;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.AccessDeniedException;
+import com.kkulpa.moviesservice.backend.errorHandling.exceptions.CommentNotFoundException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
 import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
@@ -104,33 +108,69 @@ public class MoviesSecuredController {
         return ResponseEntity.ok(ranking);
     }
 
-    @PostMapping(value = "/comment", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MovieCommentDto> addComment(@RequestBody MovieCommentDto movieCommentDto){
-        return ResponseEntity.ok(new MovieCommentDto());
+    @PostMapping(value = "/comment")
+    public ResponseEntity<List<MovieCommentDto>> addComment(Authentication authentication,
+                                                         @RequestParam String imdbId,
+                                                         @RequestParam String comment)
+                                                                    throws Exception {
+
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+
+        List<MovieComment> comments = movieService.addComment(requestingUser ,imdbId, comment);
+
+        return ResponseEntity.ok(MovieCommentMapper.mapListToDto(comments));
     }
 
     @PutMapping(value = "/comment", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<MovieCommentDto> editComment(@RequestBody MovieCommentDto movieCommentDto){
-        return ResponseEntity.ok(new MovieCommentDto());
+    public ResponseEntity<MovieCommentDto> editComment( Authentication authentication,
+                                                        @RequestBody MovieCommentDto movieCommentDto)
+                                                                    throws UserNotFoundException,
+                                                                    AccessDeniedException,
+                                                                    CommentNotFoundException {
+
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+
+        MovieComment movieComment = movieService
+                .updateComment(requestingUser, movieCommentDto.getId(), movieCommentDto.getComment());
+
+        return ResponseEntity.ok(MovieCommentMapper.mapToDto(movieComment));
     }
 
     @DeleteMapping(value = "/comment")
-    public ResponseEntity<Void> deleteComment(@RequestParam Long commentId){
+    public ResponseEntity<Void> deleteComment(Authentication authentication,
+                                                @RequestParam Long commentId)
+                                                            throws UserNotFoundException,
+                                                            AccessDeniedException,
+                                                            CommentNotFoundException {
+
+        ApplicationUser requestingUser = (ApplicationUser) authentication.getPrincipal();
+
+        movieService.deleteComment(requestingUser, commentId);
+
         return ResponseEntity.ok().build();
     }
 
     @GetMapping(value = "/comment/byMovie")
     public ResponseEntity<List<MovieCommentDto>> getCommentsByMovie(@RequestParam String imdbId){
-        return ResponseEntity.ok().build();
+
+        List<MovieComment> comments = movieService.getMovieCommentsByMovie(imdbId);
+
+        return ResponseEntity.ok(MovieCommentMapper.mapListToDto(comments));
     }
 
     @GetMapping(value = "/comment/byUser")
-    public ResponseEntity<List<MovieCommentDto>> getCommentsByUser(@RequestParam Long userId){
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<MovieCommentDto>> getCommentsByUser(@RequestParam String username){
+
+        List<MovieComment> comments = movieService.getMovieCommentsByAuthor(username);
+
+        return ResponseEntity.ok(MovieCommentMapper.mapListToDto(comments));
     }
 
     @GetMapping(value = "/searchStats")
     public ResponseEntity<List<String>> getTopSearchedPhrases(){
+
+
+
         return ResponseEntity.ok().build();
     }
 
