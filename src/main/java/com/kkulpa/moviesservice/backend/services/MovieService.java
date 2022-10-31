@@ -194,6 +194,22 @@ public class MovieService {
         return movieDetails.getMovieStatistics().getImpressionCount();
     }
 
+    public List<MovieDetails> getMovieRecommendations(){
+
+        List<MovieDetails> movies = movieDetailsRepository.findAll();
+
+        if(movies.size()<3)
+        {
+            return List.of(movieDetailsService.getOrAddMovieDetails("tt0137523"),
+                            movieDetailsService.getOrAddMovieDetails("tt0172495"),
+                            movieDetailsService.getOrAddMovieDetails("tt1210166")
+                    );
+        }
+
+        Collections.shuffle(movies);
+
+        return movies.stream().limit(3).collect(Collectors.toList());
+    }
 
 
 
@@ -227,11 +243,6 @@ public class MovieService {
         user.getRatings().add(movieRatingToBeSaved);
         userRepository.save(user);
     }
-
-
-
-
-
 
     private int normalizeScore(int score){
         if(score<1)

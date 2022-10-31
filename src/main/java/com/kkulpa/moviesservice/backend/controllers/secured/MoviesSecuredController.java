@@ -4,16 +4,13 @@ package com.kkulpa.moviesservice.backend.controllers.secured;
 import com.kkulpa.moviesservice.backend.domain.DTOs.*;
 import com.kkulpa.moviesservice.backend.domain.MovieComment;
 import com.kkulpa.moviesservice.backend.domain.MovieDetails;
-import com.kkulpa.moviesservice.backend.domain.MovieRating;
 import com.kkulpa.moviesservice.backend.domain.SearchStatistics;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieCommentMapper;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
-import com.kkulpa.moviesservice.backend.domain.mappers.MovieRatingMapper;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.AccessDeniedException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.CommentNotFoundException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
-import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
 import com.kkulpa.moviesservice.backend.services.MovieService;
 import com.kkulpa.moviesservice.backend.services.StatisticsService;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
@@ -24,7 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/secured/movies")
@@ -177,5 +173,7 @@ public class MoviesSecuredController {
 
         return ResponseEntity.ok(movieService.getMovieProfileViewCount(imdbId));
     }
+
+
 
 }
