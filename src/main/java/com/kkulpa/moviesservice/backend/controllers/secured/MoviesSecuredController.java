@@ -167,21 +167,15 @@ public class MoviesSecuredController {
     }
 
     @GetMapping(value = "/searchStats")
-    public ResponseEntity<List<String>> getTopSearchedPhrases(){
-
-
-
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<SearchStatistics>> getTopSearchedPhrases(){
+        return ResponseEntity.ok(movieService.getMostSearched());
     }
 
     @GetMapping(value = "/viewStats")
-    public ResponseEntity<Long> getMovieProfileViewCount(@RequestParam String imdbId){
-        return ResponseEntity.ok(5L);
+    public ResponseEntity<Long> getMovieProfileViewCount(@RequestParam String imdbId)
+                                                    throws MovieDetailsUnavailableException {
+
+        return ResponseEntity.ok(movieService.getMovieProfileViewCount(imdbId));
     }
-
-
-
-
-
 
 }

@@ -1,22 +1,16 @@
 package com.kkulpa.moviesservice.backend.services;
 
 import com.kkulpa.moviesservice.backend.client.OmdbClient;
+import com.kkulpa.moviesservice.backend.domain.*;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieCommentDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDetailsDto;
 import com.kkulpa.moviesservice.backend.domain.DTOs.MovieDto;
-import com.kkulpa.moviesservice.backend.domain.MovieComment;
-import com.kkulpa.moviesservice.backend.domain.MovieDetails;
-import com.kkulpa.moviesservice.backend.domain.MovieRating;
-import com.kkulpa.moviesservice.backend.domain.User;
 import com.kkulpa.moviesservice.backend.domain.mappers.MovieDetailsMappers;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.AccessDeniedException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.CommentNotFoundException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.MovieDetailsUnavailableException;
 import com.kkulpa.moviesservice.backend.errorHandling.exceptions.UserNotFoundException;
-import com.kkulpa.moviesservice.backend.repositories.MovieCommentRepository;
-import com.kkulpa.moviesservice.backend.repositories.MovieDetailsRepository;
-import com.kkulpa.moviesservice.backend.repositories.MovieRatingRepository;
-import com.kkulpa.moviesservice.backend.repositories.UserRepository;
+import com.kkulpa.moviesservice.backend.repositories.*;
 import com.kkulpa.moviesservice.security.auth.ApplicationUser;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +33,7 @@ public class MovieService {
     private final MovieDetailsRepository movieDetailsRepository;
     private final UserRepository userRepository;
     private final MovieCommentRepository movieCommentRepository;
+    private final SearchStatisticsRepository searchStatisticsRepository;
 
 
 
@@ -184,6 +179,20 @@ public class MovieService {
 
     }
 
+    public List<SearchStatistics> getMostSearched(){
+
+        return searchStatisticsRepository.getTopSearches().stream().limit(3).collect(Collectors.toList());
+
+    }
+
+    public Long getMovieProfileViewCount(String imdbId) throws MovieDetailsUnavailableException {
+
+        MovieDetails movieDetails = movieDetailsRepository
+                .findMovieDetailsByImdbID(imdbId)
+                .orElseThrow(MovieDetailsUnavailableException::new);
+
+        return movieDetails.getMovieStatistics().getImpressionCount();
+    }
 
 
 
